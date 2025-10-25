@@ -1,0 +1,280 @@
+Perfecto 🏡
+Aquí tienes la **versión mejorada** del código, con **iconos inmobiliarios** (usando [Font Awesome CDN](https://cdnjs.com/libraries/font-awesome)), integrados en el calendario, los tipos de propiedades y el encabezado.
+Los íconos añaden un toque profesional y refuerzan la identidad visual del sector inmobiliario.
+
+---
+
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agenda de Visitas | Inmobiliaria</title>
+
+<!-- Font Awesome para iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+  :root{
+    --azul:#0d3b66;
+    --azul-osc:#0a2d4e;
+    --azul-claro:#1f4f8b;
+    --gris:#6b7280;
+    --gris-claro:#e5e7eb;
+    --gris-medio:#cbd5e1;
+    --blanco:#ffffff;
+    --verde:#16a34a;
+    --rojo:#dc2626;
+    --amarillo:#f59e0b;
+    --sombra: 0 10px 25px rgba(13,59,102,.15);
+    --radio: 16px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color:#0f172a;
+    background:linear-gradient(120deg,#f3f6fb 0%, #eef2f7 100%);
+  }
+  header{
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul-claro) 100%);
+    color:var(--blanco);
+    padding:30px 18px;
+    text-align:center;
+    box-shadow: var(--sombra);
+  }
+  header h1{
+    margin:0;font-size:clamp(22px,3vw,32px);
+    display:flex;justify-content:center;align-items:center;gap:10px
+  }
+  header h1 i{color:#facc15}
+  header p{margin:6px 0 0;color:#dbeafe}
+  .wrap{max-width:1100px;margin:24px auto;padding:0 14px 60px;}
+
+  /* Layout */
+  .grid{display:grid;grid-template-columns: 1.1fr .9fr;gap:22px;}
+  @media (max-width:960px){.grid{grid-template-columns:1fr}}
+
+  /* Card */
+  .card{
+    background:var(--blanco);
+    border:1px solid var(--gris-medio);
+    border-radius:var(--radio);
+    box-shadow: var(--sombra);
+    overflow:hidden;
+  }
+  .card h3{margin:0;padding:18px 18px 0;font-size:20px;color:var(--azul-osc);}
+  .card h3 i{color:var(--azul-claro);margin-right:8px;}
+  .card .sub{padding:4px 18px 8px;color:var(--gris);font-size:14px;}
+  .card .body{padding:14px 18px 18px}
+
+  /* Calendar */
+  .cal-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 18px;border-bottom:1px solid var(--gris-medio);background:#f8fafc
+  }
+  .cal-head .month{font-weight:700;color:var(--azul-osc)}
+  .cal-nav button{
+    border:none;background:var(--azul);color:var(--blanco);
+    padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600
+  }
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:12px}
+  .dow{text-align:center;color:var(--gris);font-size:12px;padding-bottom:6px}
+  .day{
+    background:#fff;border:1px solid var(--gris-medio);
+    border-radius:12px;min-height:84px;padding:8px;display:flex;flex-direction:column;
+    justify-content:space-between;cursor:pointer;transition:.15s transform, .15s border-color;
+  }
+  .day:hover{transform:translateY(-2px);border-color:var(--azul-claro)}
+  .day.disabled{opacity:.45;cursor:not-allowed;background:#f3f4f6}
+  .day .n{font-weight:700;color:var(--azul-osc)}
+  .day .spots{font-size:12px;color:var(--gris);margin-top:4px}
+  .day .badge{align-self:flex-start;margin-top:6px;font-size:10px;background:#e0ecff;color:var(--azul);
+    padding:2px 6px;border-radius:999px;border:1px solid #bfd3ff}
+  .day.selected{outline:3px solid #bfdbfe}
+  .legend{display:flex;gap:12px;align-items:center;color:var(--gris);font-size:12px;margin-top:8px}
+  .legend .dot{width:10px;height:10px;border-radius:999px;display:inline-block;margin-right:4px;border:1px solid var(--gris-medio)}
+  .dot-open{background:#d1fae5;border-color:#86efac}
+  .dot-limit{background:#fee2e2;border-color:#fecaca}
+
+  /* Form */
+  form label{display:block;font-weight:600;margin:14px 0 6px;color:var(--azul-osc)}
+  form select, form input{
+    width:100%;padding:12px;border:1px solid var(--gris-medio);
+    border-radius:12px;background:#fff;font-size:15px;outline:none
+  }
+  form select:focus, form input:focus{border-color:#93c5fd; box-shadow:0 0 0 4px #dbeafe}
+
+  .times{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+  .slot{border:1px solid var(--gris-medio);border-radius:10px;padding:10px 8px;text-align:center;
+    cursor:pointer;background:#f8fafc;font-weight:600;color:var(--azul-osc);transition:.15s}
+  .slot:hover{transform:translateY(-2px);border-color:#93c5fd}
+  .slot.selected{outline:3px solid #bfdbfe;background:#eff6ff}
+  .slot.booked,.slot.disabled{opacity:.45;cursor:not-allowed;text-decoration:line-through}
+
+  .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn{border:none;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer}
+  .btn-primary{background:var(--azul);color:var(--blanco)}
+  .btn-secondary{background:#e5e7eb;color:#111827}
+  .btn[disabled]{opacity:.6;cursor:not-allowed}
+
+  /* Persuasivo */
+  .pitch{background: linear-gradient(135deg,#eaf2ff 0%, #f6f8fc 100%);
+    border:1px solid #cfe0ff;border-radius:var(--radio);
+    padding:16px;color:#0f172a}
+  .pitch h4{margin:0 0 8px;color:var(--azul-osc);display:flex;align-items:center;gap:8px}
+  .pitch h4 i{color:#0d3b66;}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--gris-medio);
+    border-radius:999px;font-size:12px;color:var(--gris);background:#fff;margin:4px 6px 0 0}
+
+  .alert{margin:12px 0;padding:12px;border-radius:12px;border:1px solid #fde68a;background:#fffbeb;color:#92400e}
+  .success{margin:12px 0;padding:12px;border-radius:12px;border:1px solid #bbf7d0;background:#ecfdf5;color:#065f46}
+</style>
+</head>
+<body>
+<header>
+  <h1><i class="fa-solid fa-building"></i> Agenda tu visita o asesoría</h1>
+  <p>Conoce la propiedad ideal para ti — atención exclusiva, máximo 8 citas por día</p>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <!-- CALENDARIO -->
+    <section class="card">
+      <div class="cal-head">
+        <div class="month" id="calMonth">Mes Año</div>
+        <div class="cal-nav">
+          <button id="prevBtn" type="button"><i class="fa-solid fa-chevron-left"></i></button>
+          <button id="nextBtn" type="button"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+      </div>
+      <div class="body">
+        <div class="cal-grid" id="dowRow"></div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="legend">
+          <span><span class="dot dot-open"></span> Fecha con cupo</span>
+          <span><span class="dot dot-limit"></span> Límite diario</span>
+          <span style="margin-left:auto;"><i class="fa-solid fa-calendar-check"></i> 8 citas máximo</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORMULARIO -->
+    <section class="card">
+      <h3><i class="fa-solid fa-handshake"></i> Reserva tu horario</h3>
+      <div class="sub">Selecciona la fecha, hora y tipo de propiedad.</div>
+      <div class="body">
+        <div id="selectionInfo" class="alert" style="display:none"></div>
+
+        <form id="bookingForm">
+          <label for="tipoCita"><i class="fa-solid fa-calendar-day"></i> Tipo de cita</label>
+          <select id="tipoCita" required>
+            <option value="Visita a propiedad">Visita a propiedad</option>
+            <option value="Asesoría">Asesoría</option>
+          </select>
+
+          <label for="tipoProp"><i class="fa-solid fa-building-circle-check"></i> Tipo de propiedad</label>
+          <select id="tipoProp" required>
+            <option value="Casa habitación">🏠 Casa habitación</option>
+            <option value="Departamento">🏢 Departamento</option>
+            <option value="Oficina">🏬 Oficina</option>
+          </select>
+
+          <label for="fechaElegida"><i class="fa-solid fa-calendar-days"></i> Fecha seleccionada</label>
+          <input id="fechaElegida" type="text" readonly required placeholder="Selecciona una fecha"/>
+
+          <label><i class="fa-solid fa-clock"></i> Horario</label>
+          <div class="times" id="timeSlots"></div>
+
+          <label for="nombre"><i class="fa-solid fa-user"></i> Nombre completo</label>
+          <input id="nombre" type="text" required placeholder="Tu nombre"/>
+
+          <label for="email"><i class="fa-solid fa-envelope"></i> Correo electrónico</label>
+          <input id="email" type="email" required placeholder="tu@correo.com"/>
+
+          <label for="tel"><i class="fa-solid fa-phone"></i> Teléfono</label>
+          <input id="tel" type="tel" required placeholder="10 dígitos"/>
+
+          <div id="confirmBox" class="success" style="display:none"></div>
+
+          <div class="cta">
+            <button class="btn btn-secondary" type="button" id="clearBtn"><i class="fa-solid fa-eraser"></i> Limpiar</button>
+            <button class="btn btn-primary" type="submit" id="submitBtn" disabled><i class="fa-solid fa-check"></i> Confirmar cita</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:20px">
+    <div class="body">
+      <div class="pitch">
+        <h4><i class="fa-solid fa-key"></i> Haz realidad tu inversión</h4>
+        <p>Agenda hoy y asegura uno de los <b>8 lugares diarios</b> para recibir atención personalizada, comparativos de mercado y opciones exclusivas.</p>
+        <div>
+          <span class="pill"><i class="fa-solid fa-user-tie"></i> Trato profesional</span>
+          <span class="pill"><i class="fa-solid fa-chart-line"></i> Análisis de plusvalía</span>
+          <span class="pill"><i class="fa-solid fa-house-circle-check"></i> Propiedades premium</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* El mismo JS funcional de la versión anterior */
+(function(){
+  const DAILY_LIMIT=8;
+  const STORAGE_KEY="citas_inmo_v2";
+  const BASE_SLOTS=["09:00","10:00","11:00","12:00","13:00","16:00","17:00","18:00"];
+  let current=new Date();current.setDate(1);
+  let selectedDateISO=null;let selectedTime=null;
+  const $=s=>document.querySelector(s);const $$=s=>Array.from(document.querySelectorAll(s));
+  const fmtISO=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  const fmtHuman=iso=>new Date(iso+"T00:00:00").toLocaleDateString("es-MX",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  const load=()=>JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");
+  const save=d=>localStorage.setItem(STORAGE_KEY,JSON.stringify(d));
+  const isPast=iso=>new Date(iso)<new Date(new Date().toDateString());
+  function renderCal(){
+    $("#calMonth").textContent=current.toLocaleDateString("es-MX",{month:"long",year:"numeric"});
+    const dow=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+    const dowRow=$("#dowRow");dowRow.innerHTML="";dow.forEach(d=>{const el=document.createElement("div");el.className="dow";el.textContent=d;dowRow.appendChild(el);});
+    const cal=$("#calGrid");cal.innerHTML="";const first=(current.getDay()+6)%7;const days=new Date(current.getFullYear(),current.getMonth()+1,0).getDate();
+    const data=load();for(let i=0;i<first;i++){const f=document.createElement("div");f.style.visibility="hidden";cal.appendChild(f);}
+    for(let day=1;day<=days;day++){const cell=document.createElement("button");cell.className="day";const date=new Date(current.getFullYear(),current.getMonth(),day);
+      const iso=fmtISO(date);const booked=(data[iso]||[]).length;const rem=Math.max(0,DAILY_LIMIT-booked);
+      if(isPast(iso))cell.classList.add("disabled");if(rem===0)cell.classList.add("disabled");
+      cell.innerHTML=`<div class="n">${day}</div><div class="spots">${rem>0?rem+" lugares":"Sin cupo"}</div><div class="badge"><i class="fa-solid fa-house"></i> ${booked>0?booked+" citas":"Libre"}</div>`;
+      cell.onclick=()=>{if(cell.classList.contains("disabled"))return;$$(".day.selected").forEach(d=>d.classList.remove("selected"));
+        cell.classList.add("selected");selectedDateISO=iso;$("#fechaElegida").value=fmtHuman(iso);selectedTime=null;renderSlots();validate();}
+      cal.appendChild(cell);
+    }
+  }
+  function renderSlots(){
+    const box=$("#timeSlots");box.innerHTML="";
+    if(!selectedDateISO){box.innerHTML="<div>Selecciona una fecha.</div>";return;}
+    const data=load();const booked=(data[selectedDateISO]||[]).map(x=>x.hora);
+    BASE_SLOTS.forEach(h=>{const b=document.createElement("div");b.className="slot";b.textContent=h;if(booked.includes(h))b.classList.add("booked");
+      b.onclick=()=>{if(b.classList.contains("booked"))return;$$(".slot.selected").forEach(s=>s.classList.remove("selected"));
+        b.classList.add("selected");selectedTime=h;validate();};box.appendChild(b);});
+  }
+  function validate(){
+    $("#submitBtn").disabled=!($("#tipoCita").value&&$("#tipoProp").value&&selectedDateISO&&selectedTime&&$("#nombre").value.trim()&&$("#email").validity.valid&&$("#tel").validity.valid);
+  }
+  $("#bookingForm").addEventListener("input",validate);
+  $("#bookingForm").addEventListener("submit",e=>{
+    e.preventDefault();if($("#submitBtn").disabled)return;
+    const d=load();const arr=d[selectedDateISO]||[];
+    if(arr.length>=DAILY_LIMIT)return alert("Cupo diario lleno.");
+    if(arr.some(x=>x.hora===selectedTime))return alert("Ese horario ya está ocupado.");
+    const entry={tipoCita:$("#tipoCita").value,tipoProp:$("#tipoProp").value,fecha:selectedDateISO,hora:selectedTime,nombre:$("#nombre").value,email:$("#email").value,tel:$("#tel").value};
+    arr.push(entry);d[selectedDateISO]=arr;save(d);
+    $("#confirmBox").style.display="block";
+    $("#confirmBox").innerHTML=`✅ Cita confirmada para <b>${fmtHuman(selectedDateISO)}</b> a las <b>${selectedTime}</b>.`;
+    renderCal();renderSlots();
+  });
+  $("#clearBtn").onclick=()=>{$("#bookingForm").reset();selectedDateISO=null;selectedTime=null;renderCal();renderSlots();};
+  $("#prevBtn").onclick=()=>{current.setMonth(current.getMonth()-1);renderCal();};
+  $("#nextBtn").onclick=
+```
